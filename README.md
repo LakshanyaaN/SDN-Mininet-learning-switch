@@ -1,190 +1,189 @@
-# SDN Learning Switch Implementation using Mininet and POX Controller
+# SDN Learning Switch using Mininet & POX
+
+![SDN](https://img.shields.io/badge/Networking-SDN-blue)
+![Mininet](https://img.shields.io/badge/Mininet-Network%20Emulator-green)
+![POX](https://img.shields.io/badge/Controller-POX-orange)
+![OpenFlow](https://img.shields.io/badge/OpenFlow-1.0-red)
+![Platform](https://img.shields.io/badge/Platform-WSL2%20%7C%20Ubuntu%2022.04-lightgrey)
+
+---
 
 ## Project Overview
-This project demonstrates a Software-Defined Networking (SDN) based **Layer-2 Learning Switch** using:
-- **Mininet** for network topology emulation
-- **POX** as the OpenFlow controller
+This project implements a **Layer-2 SDN Learning Switch** using:
+- **Mininet** for network emulation  
+- **POX** as the OpenFlow controller  
 
-The controller dynamically learns MAC addresses of connected hosts and installs precise flow rules on the switch.
+The controller dynamically learns MAC addresses and installs flow rules, enabling efficient forwarding and centralized control.
+
+---
+
+## Problem Statement
+Design an SDN-based learning switch that:
+- Handles `packet_in` events  
+- Learns MAC-to-port mappings  
+- Installs OpenFlow match–action rules  
+- Demonstrates forwarding and selective traffic blocking  
 
 ---
 
 ## Objective
-- Establish controller-switch interaction over OpenFlow 1.0  
-- Implement dynamic MAC address learning (packet-in handling)  
-- Install explicit match-action flow rules on the switch  
-- Observe network behavior and validate correct forwarding  
+- Establish controller–switch communication  
+- Implement MAC learning logic  
+- Install dynamic flow rules  
+- Validate forwarding and policy enforcement  
 
 ---
 
 ## Topology
-A simple tree topology with:
-- **1 Open vSwitch** (`s1`)
-- **3 Hosts** (`h1`, `h2`, `h3`)
-
 ```
         s1
       / | \
     h1  h2  h3
 ```
 
----
-
-## Environment & Prerequisites
-- **Operating System**: Ubuntu 22.04 (WSL2)
-- **Mininet**:
-  ```bash
-  sudo apt install mininet -y
-  ```
-- **POX Controller**:
-  ```bash
-  git clone https://github.com/noxrepo/pox.git
-  ```
+- **1 Switch (s1)**  
+- **3 Hosts (h1, h2, h3)**  
 
 ---
 
-## How to Run
+## Design Justification
+A minimal single-switch topology ensures:
+- Clear visibility of controller decisions  
+- Easy flow rule analysis  
+- Controlled testing (forwarding vs blocking)  
+- Focus on SDN logic without routing complexity  
 
-### Step 1: Clone POX Controller
+---
+
+## Setup
+
+### Install Dependencies
 ```bash
+sudo apt install mininet -y
 git clone https://github.com/noxrepo/pox.git
-cd pox
 ```
 
-### Step 2: Start POX Controller (Terminal 1)
+---
+
+## Execution
+
+### 1. Start Controller
 ```bash
 cd ~/pox
-./pox.py openflow.of_01 --address=127.0.0.1 --port=6633 forwarding.l2_learning
+./pox.py openflow.of_01 forwarding.custom_learning
 ```
 
-**Expected Output:**
-```
-INFO:core:POX 0.7.0 (gar) is up.
-INFO:openflow.of_01:Listening on 127.0.0.1:6633
-INFO:forwarding.l2_learning:Learning switch running.
-```
-
----
-
-### Step 3: Start Mininet Topology (Terminal 2)
+### 2. Start Mininet
 ```bash
 sudo mn --topo single,3 --controller remote --mac --switch ovsk
 ```
 
----
-
-### Step 4: Test Connectivity
+### 3. Run Tests
 ```bash
 mininet> pingall
-```
-
-**Expected:**
-```
-0% dropped (6/6 received)
-```
-
----
-
-### Step 5: View Flow Rules
-```bash
 mininet> sh ovs-ofctl dump-flows s1
 ```
 
 ---
 
-### Step 6: Exit
-```bash
-mininet> exit
-```
+## Test Scenarios
 
-Press `Ctrl + C` in the POX terminal to stop the controller.
+### Normal Forwarding
+```
+mininet> pingall
+```
+✔ All hosts reachable  
+✔ Flow rules installed dynamically  
 
 ---
 
-## Expected Output & Observations
-
-### Pingall Result
+### Blocked Host (Policy Enforcement)
 ```
-*** Ping: testing ping reachability
-h1 -> h2 h3
-h2 -> h1 h3
-h3 -> h1 h2
-*** Results: 0% dropped (6/6 received)
+mininet> h1 ping -c 3 h2
+mininet> h3 ping -c 3 h1
 ```
+✔ h1 ↔ h2 works  
+✖ h3 traffic blocked  
 
 ---
 
-### Flow Table Example
-```
-cookie=0x0, duration=12.3s, table=0, n_packets=3, n_bytes=294, priority=1, in_port=1,dl_src=00:00:00:00:00:01,dl_dst=00:00:00:00:00:02 actions=output:2
-cookie=0x0, duration=12.3s, table=0, n_packets=3, n_bytes=294, priority=1, in_port=2,dl_src=00:00:00:00:00:02,dl_dst=00:00:00:00:00:01 actions=output:1
-```
+## Performance Analysis
+
+- **Latency:** Initial delay due to controller processing → reduced after flow installation  
+- **Throughput:** Stable once flows are installed  
+- **Key Insight:**  
+  - First packet → handled by controller  
+  - Subsequent packets → handled by switch (data plane)  
 
 ---
 
-### Controller Logs (POX Terminal)
-```
-INFO:forwarding.l2_learning:Learned 00:00:00:00:00:01 on port 1 of switch 1
-INFO:forwarding.l2_learning:Learned 00:00:00:00:00:02 on port 2 of switch 1
-```
+## Flow Table Analysis
 
----
+### Protocol-Based Flows
+- ARP / ICMP rules  
+- Fields: `nw_src`, `arp_spa`, `icmp_type`  
 
-## Performance Note
-- First ping has slight delay (due to MAC learning)
-- Subsequent pings are faster (flow rules handle forwarding)
+### MAC-Based Flows
+- Match: `dl_src`, `dl_dst`  
+- Action: output port  
+
+**Conclusion:**  
+System transitions from protocol handling → efficient Layer-2 forwarding  
 
 ---
 
 ## Proof of Execution
 
-### POX Controller Running
-![POX Controller](screenshots/pox_startup.png)
+### Controller Startup
+![POX](screenshots/pox_startup.png)
 
----
+### Connectivity Test
+![Ping](screenshots/pingall_result.png)
 
-### Successful Connectivity (pingall)
-![Pingall Result](screenshots/pingall_result.png)
+### Blocked Traffic
+![Blocked](screenshots/blocked_host.png)
 
----
+### Flow Tables
+![Flow](screenshots/flow_table.png)
+![Flow](screenshots/flow_table2.png)
 
-### Blocked Host Scenario
-![Blocked Host](screenshots/blocked_host.png)
+### Controller Logs
+![Logs](screenshots/controller_logs.png)
 
----
+### Wireshark (OpenFlow Traffic)
+![Wireshark](screenshots/wireshark.png)
 
-### Flow Table Entries
-![Flow Table](screenshots/flow_table.png)
-![Flow Table](screenshots/flow_table2.png)
-
----
-
-### Controller Logs (Learning + Blocking)
-![Controller Logs](screenshots/controller_logs.png)
-
----
-
-### Wireshark Capture (OpenFlow Traffic)
-![Wireshark Capture](screenshots/wireshark.png)
 ---
 
 ## Validation
-- Controller-switch handshake (OpenFlow 1.0)  
-- MAC addresses dynamically learned  
-- Flow rules with correct match-action  
-- 0% packet loss on pingall  
-- Flow table verified via `ovs-ofctl`  
+✔ Controller-switch handshake  
+✔ MAC learning implemented  
+✔ Flow rules correctly installed  
+✔ Selective blocking enforced  
+✔ Flow table verified  
+
+---
+
+## Tech Stack
+- **Mininet**
+- **POX Controller**
+- **OpenFlow 1.0**
+- **Wireshark**
+- **WSL2 (Ubuntu)**
 
 ---
 
 ## References
-- Mininet: http://mininet.org  
-- POX: https://github.com/noxrepo/pox  
-- OpenFlow 1.0 Spec: https://opennetworking.org/wp-content/uploads/2014/10/openflow-spec-v1.0.0.pdf  
+- http://mininet.org  
+- https://github.com/noxrepo/pox  
+- https://opennetworking.org  
 
 ---
 
 ## Author
 **N Lakshanyaa**  
-**PES University**  
-Course: Computer Networks / SDN Simulation Project  
+PES University  
+Computer Networks / SDN Project  
+
+---
+⭐ *If you found this useful, consider starring the repo*
