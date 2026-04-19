@@ -137,11 +137,34 @@ INFO:forwarding.l2_learning:Learned 00:00:00:00:00:02 on port 2 of switch 1
 ---
 
 ## Proof of Execution
-Screenshots stored in `/screenshots` folder:
-- `/screenshots/pox_startup.png` – POX controller running  
-- `/screenshots/pingall_result.png` – Successful connectivity  
-- `/screenshots/flow_table.png` – Installed flow rules  
 
+### POX Controller Running
+![POX Controller](screenshots/pox_startup.png)
+
+---
+
+### Successful Connectivity (pingall)
+![Pingall Result](screenshots/pingall_success.png)
+
+---
+
+### Blocked Host Scenario
+![Blocked Host](screenshots/blocked_host.png)
+
+---
+
+### Flow Table Entries
+![Flow Table](screenshots/flow_table.png)
+
+---
+
+### Controller Logs (Learning + Blocking)
+![Controller Logs](screenshots/controller_logs.png)
+
+---
+
+### Wireshark Capture (OpenFlow Traffic)
+![Wireshark Capture](screenshots/wireshark_capture.png)
 ---
 
 ## Validation
