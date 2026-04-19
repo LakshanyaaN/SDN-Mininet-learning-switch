@@ -138,9 +138,9 @@ INFO:forwarding.l2_learning:Learned 00:00:00:00:00:02 on port 2 of switch 1
 
 ## Proof of Execution
 Screenshots stored in `/screenshots` folder:
-- `pox_startup.png` – POX controller running  
-- `pingall_result.png` – Successful connectivity  
-- `flow_table.png` – Installed flow rules  
+- `/screenshots/pox_startup.png` – POX controller running  
+- `/screenshots/pingall_result.png` – Successful connectivity  
+- `/screenshots/flow_table.png` – Installed flow rules  
 
 ---
 
