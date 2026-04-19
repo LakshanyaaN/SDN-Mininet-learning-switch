@@ -144,7 +144,7 @@ INFO:forwarding.l2_learning:Learned 00:00:00:00:00:02 on port 2 of switch 1
 ---
 
 ### Successful Connectivity (pingall)
-![Pingall Result](screenshots/pingall_success.png)
+![Pingall Result](screenshots/pingall_result.png)
 
 ---
 
@@ -155,6 +155,7 @@ INFO:forwarding.l2_learning:Learned 00:00:00:00:00:02 on port 2 of switch 1
 
 ### Flow Table Entries
 ![Flow Table](screenshots/flow_table.png)
+![Flow Table](screenshots/flow_table2.png)
 
 ---
 
@@ -164,7 +165,7 @@ INFO:forwarding.l2_learning:Learned 00:00:00:00:00:02 on port 2 of switch 1
 ---
 
 ### Wireshark Capture (OpenFlow Traffic)
-![Wireshark Capture](screenshots/wireshark_capture.png)
+![Wireshark Capture](screenshots/wireshark.png)
 ---
 
 ## Validation
